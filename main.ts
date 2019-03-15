@@ -17,21 +17,22 @@ scoreText.scale.x = 0.25;
 scoreText.scale.y = 0.25;
 
 app.stage.addChild(scoreText);
-
+let knightTexture = new PIXI.Texture(
+  PIXI.Texture.fromImage("knight.png").baseTexture,
+  new PIXI.Rectangle(0, 0, 8, 8),
+);
+let knightTexture2 = new PIXI.Texture(
+  PIXI.Texture.fromImage("knight.png").baseTexture,
+  new PIXI.Rectangle(0, 8, 8, 8),
+);
+let brickTexture = PIXI.Texture.fromImage("brick.png");
 class Player extends Entity {
   public jumps: number = 2;
   public jump: boolean = false;
   public direction: number = 0;
   public speed: number = 0.07;
   constructor() {
-    super(
-      0,
-      0,
-      new PIXI.Graphics()
-        .beginFill(0xde3249)
-        .drawRect(0, 0, 8, 8)
-        .endFill(),
-    );
+    super(0, 0, new PIXI.Sprite(knightTexture));
   }
 }
 
@@ -39,14 +40,7 @@ const player = new Player();
 player.teleport(50, 50);
 class Collider extends Entity {
   constructor(x: number, y: number, width: number, height: number) {
-    super(
-      0,
-      0,
-      new PIXI.Graphics()
-        .beginFill(0xde3249)
-        .drawRect(0, 0, 8, 8)
-        .endFill(),
-    );
+    super(0, 0, new PIXI.extras.TilingSprite(brickTexture, width, height));
     this.teleport(x, y);
     this.sprite.width = width;
     this.sprite.height = height;
@@ -55,9 +49,11 @@ class Collider extends Entity {
 
 const colliders: Array<Collider> = [];
 //colliders.push(new Collider(0, 0, 128, 8));
-colliders.push(new Collider(0, 0, 4, 128));
+colliders.push(new Collider(0, 0, 8, 128));
 //colliders.push(new Collider(0, 1418, 128, 8));
-colliders.push(new Collider(124, 0, 4, 128));
+colliders.push(new Collider(120, 0, 8, 128));
+colliders.push(new Collider(0, 120, 128, 8));
+colliders.push(new Collider(20, 20, 8, 8));
 
 document.body.addEventListener("keydown", event => {
   switch (event.keyCode) {
@@ -139,11 +135,13 @@ function update(delta: number) {
     if (player.vx < 0) {
       player.vx *= 0.9;
     }
+    //player.sprite.scale.x = 1;
     player.vx += 0.005;
   } else if (player.direction < 0) {
     if (player.vx > 0) {
       player.vx *= 0.9;
     }
+    //player.sprite.scale.x = -1;
     player.vx -= 0.005;
   } else {
     player.vx *= 0.9;
