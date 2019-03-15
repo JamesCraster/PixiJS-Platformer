@@ -1,0 +1,23 @@
+{
+  "name": "portalthonbasic",
+  "version": "1.0.0",
+  "description": "",
+  "main": "entity.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JamesCraster/DemoPlatformer.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/JamesCraster/DemoPlatformer/issues"
+  },
+  "homepage": "https://github.com/JamesCraster/DemoPlatformer#readme",
+  "dependencies": {
+    "@types/mainloop.js": "^1.0.5",
+    "@types/pixi.js": "^4.8.6"
+  }
+}
