@@ -58,11 +58,16 @@ var Collider = /** @class */ (function (_super) {
 }(Entity));
 var colliders = [];
 //colliders.push(new Collider(0, 0, 128, 8));
-colliders.push(new Collider(0, 0, 8, 128));
+//colliders.push(new Collider(0, 0, 8, 128));
 //colliders.push(new Collider(0, 1418, 128, 8));
-colliders.push(new Collider(120, 0, 8, 128));
-colliders.push(new Collider(0, 120, 128, 8));
+//colliders.push(new Collider(120, 0, 8, 128));
+//colliders.push(new Collider(120, 0, 16, 128));
+//colliders.push(new Collider(0, 120, 128, 8));
+//colliders.push(new Collider(120, 0, 8, 128));
 colliders.push(new Collider(20, 20, 8, 8));
+colliders.push(new Collider(80, 20, 8, 8));
+colliders.push(new Collider(100, 20, 8, 8));
+//colliders.push(new Collider(20, 28 + 8, 8, 8));
 document.body.addEventListener("keydown", function (event) {
     switch (event.keyCode) {
         case 38:
@@ -156,9 +161,11 @@ function update(delta) {
     player.dx = player.vx * delta;
     player.dy = player.vy * delta;
     if (player.dx > 0) {
+        var distances = [];
         for (var i = 0; i < colliders.length; i++) {
-            player.dx = Math.min(raycast(player, player.dx, colliders[i]), player.dx);
+            distances.push(raycast(player, player.dx, colliders[i]));
         }
+        player.dx = Math.min(Math.min.apply(Math, distances), player.dx);
     }
     else {
         for (var i = 0; i < colliders.length; i++) {
@@ -171,9 +178,11 @@ function update(delta) {
         }
     }
     else {
+        var distances = [];
         for (var i = 0; i < colliders.length; i++) {
-            player.dy = Math.min(player.dy, raycast(flip(player), player.dy, flip(colliders[i])));
+            distances.push(raycast(flip(player), player.dy, flip(colliders[i])));
         }
+        player.dy = Math.min(player.dy, Math.min.apply(Math, distances));
     }
     player.move(delta);
 }
