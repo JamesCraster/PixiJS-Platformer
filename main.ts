@@ -48,12 +48,12 @@ class Collider extends Entity {
 }
 
 const colliders: Array<Collider> = [];
-//colliders.push(new Collider(0, 0, 128, 8));
-//colliders.push(new Collider(0, 0, 8, 128));
+colliders.push(new Collider(0, 0, 128, 8));
+colliders.push(new Collider(0, 0, 8, 128));
 //colliders.push(new Collider(0, 1418, 128, 8));
-//colliders.push(new Collider(120, 0, 8, 128));
+colliders.push(new Collider(120, 0, 8, 128));
 //colliders.push(new Collider(120, 0, 16, 128));
-//colliders.push(new Collider(0, 120, 128, 8));
+colliders.push(new Collider(0, 120, 128, 8));
 //colliders.push(new Collider(120, 0, 8, 128));
 colliders.push(new Collider(20, 20, 8, 8));
 colliders.push(new Collider(80, 20, 8, 8));
@@ -152,7 +152,7 @@ function update(delta: number) {
   }
   //jumping
   if (player.jump) {
-    player.vy -= 0.3;
+    player.vy -= 0.25;
     player.jump = false;
   }
   //gravity
