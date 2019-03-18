@@ -123,15 +123,15 @@ function update(delta: number) {
     player.vx *= 0.9;
   }
   //jumping
-  if (player.jump) {
-    player.vy -= 0.25;
-    player.jump = false;
+  if (player.jump && player.grounded) {
+    player.vy -= 0.27;
   }
+  player.jump = false;
   //gravity
   player.vy += 0.01;
   //limit speeds
-  player.vy = Math.max(player.vy, -0.3);
-  player.vy = Math.min(player.vy, 0.06);
+  player.vy = Math.max(player.vy, -0.5);
+  player.vy = Math.min(player.vy, 0.09);
   player.vx = Math.min(player.vx, player.speed);
   player.vx = Math.max(player.vx, -player.speed);
   player.dx = player.vx * delta;
@@ -144,21 +144,29 @@ function update(delta: number) {
     }
     player.dx = Math.min(Math.min(...distances), player.dx);
   } else {
+    let distances = [];
     for (let i = 0; i < colliders.length; i++) {
-      player.dx = Math.max(player.dx, raycast(player, player.dx, colliders[i]));
+      distances.push(raycast(player, player.dx, colliders[i]));
     }
+    player.dx = Math.max(Math.max(...distances), player.dx);
   }
+  player.grounded = false;
   if (player.dy < 0) {
+    let distances = [];
     for (let i = 0; i < colliders.length; i++) {
-      player.dy = Math.max(
-        player.dy,
-        raycast(flip(player), player.dy, flip(colliders[i])),
-      );
+      distances.push(raycast(flip(player), player.dy, flip(colliders[i])));
     }
+    player.dy = Math.max(player.dy, Math.max(...distances));
   } else {
     let distances = [];
     for (let i = 0; i < colliders.length; i++) {
       distances.push(raycast(flip(player), player.dy, flip(colliders[i])));
+    }
+    if (player.dy > Math.min(...distances)) {
+      player.grounded = true;
+      if (player.vy > 0) {
+        player.vy = 0;
+      }
     }
     player.dy = Math.min(player.dy, Math.min(...distances));
   }

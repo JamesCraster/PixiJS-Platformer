@@ -21,11 +21,11 @@ function raycast(
       start.y + start.height <= obstacle.y + obstacle.height + 0.05)
   ) {
     if (direction > 0) {
-      if (obstacle.x >= start.x + start.width) {
+      if (obstacle.x + 0.05 >= start.x + start.width) {
         return obstacle.x - (start.x + start.width);
       }
     } else if (direction < 0) {
-      if (obstacle.x + obstacle.width <= start.x) {
+      if (obstacle.x + obstacle.width <= start.x + 0.05) {
         return obstacle.x + obstacle.width - start.x;
       }
     }
