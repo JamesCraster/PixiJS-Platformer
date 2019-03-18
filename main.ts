@@ -2,6 +2,7 @@ PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.NEAREST;
 const app = new PIXI.Application({ width: 128, height: 128, autoStart: false });
 document.body.appendChild(app.view);
 
+app.stage.interactiveChildren = false;
 app.stage.scale.x = 4;
 app.stage.scale.y = 4;
 app.renderer.resize(128 * 4, 128 * 4);
@@ -26,18 +27,22 @@ let knightTexture2 = new PIXI.Texture(
   new PIXI.Rectangle(0, 8, 8, 8),
 );
 let brickTexture = PIXI.Texture.fromImage("brick.png");
+let doorTexture = PIXI.Texture.fromImage("door.png");
+
 class Player extends Entity {
+  public grounded: boolean = false;
   public jumps: number = 2;
   public jump: boolean = false;
   public direction: number = 0;
   public speed: number = 0.07;
   constructor() {
     super(0, 0, new PIXI.Sprite(knightTexture));
+    this.teleport(50, 50);
   }
 }
 
 const player = new Player();
-player.teleport(50, 50);
+
 class Collider extends Entity {
   constructor(x: number, y: number, width: number, height: number) {
     super(0, 0, new PIXI.extras.TilingSprite(brickTexture, width, height));
@@ -47,6 +52,12 @@ class Collider extends Entity {
   }
 }
 
+class Door extends Entity {
+  constructor() {
+    super(0, 0, new PIXI.Sprite(doorTexture));
+  }
+}
+let door = new Door();
 const colliders: Array<Collider> = [];
 colliders.push(new Collider(0, 0, 128, 8));
 colliders.push(new Collider(0, 0, 8, 128));
@@ -94,46 +105,7 @@ document.body.addEventListener("keyup", event => {
       break;
   }
 });
-function raycast(
-  start: {
-    x: number;
-    y: number;
-    height: number;
-    width: number;
-  },
-  direction: number,
-  obstacle: {
-    x: number;
-    y: number;
-    height: number;
-    width: number;
-  },
-) {
-  //check that the obstacle is correct height
-  if (
-    (start.y >= obstacle.y && start.y <= obstacle.y + obstacle.height) ||
-    (start.y + start.height >= obstacle.y &&
-      start.y + start.height <= obstacle.y + obstacle.height)
-  ) {
-    if (direction > 0) {
-      if (obstacle.x >= start.x + start.width) {
-        return obstacle.x - (start.x + start.width);
-      }
-    } else if (direction < 0) {
-      if (obstacle.x + obstacle.width <= start.x) {
-        return obstacle.x + obstacle.width - start.x;
-      }
-    }
-  }
-  if (direction > 0) {
-    return Infinity;
-  } else {
-    return -Infinity;
-  }
-}
-function flip(input: { x: number; y: number; width: number; height: number }) {
-  return { x: input.y, y: input.x, width: input.height, height: input.width };
-}
+
 function update(delta: number) {
   if (player.direction > 0) {
     if (player.vx < 0) {
@@ -198,6 +170,7 @@ function draw(alpha: number) {
   app.render();
 }
 
-MainLoop.setUpdate(update)
+MainLoop.setSimulationTimestep(1000 / 120)
+  .setUpdate(update)
   .setDraw(draw)
   .start();

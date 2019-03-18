@@ -15,6 +15,7 @@ var __extends = (this && this.__extends) || (function () {
 PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.NEAREST;
 var app = new PIXI.Application({ width: 128, height: 128, autoStart: false });
 document.body.appendChild(app.view);
+app.stage.interactiveChildren = false;
 app.stage.scale.x = 4;
 app.stage.scale.y = 4;
 app.renderer.resize(128 * 4, 128 * 4);
@@ -31,20 +32,22 @@ app.stage.addChild(scoreText);
 var knightTexture = new PIXI.Texture(PIXI.Texture.fromImage("knight.png").baseTexture, new PIXI.Rectangle(0, 0, 8, 8));
 var knightTexture2 = new PIXI.Texture(PIXI.Texture.fromImage("knight.png").baseTexture, new PIXI.Rectangle(0, 8, 8, 8));
 var brickTexture = PIXI.Texture.fromImage("brick.png");
+var doorTexture = PIXI.Texture.fromImage("door.png");
 var Player = /** @class */ (function (_super) {
     __extends(Player, _super);
     function Player() {
         var _this = _super.call(this, 0, 0, new PIXI.Sprite(knightTexture)) || this;
+        _this.grounded = false;
         _this.jumps = 2;
         _this.jump = false;
         _this.direction = 0;
         _this.speed = 0.07;
+        _this.teleport(50, 50);
         return _this;
     }
     return Player;
 }(Entity));
 var player = new Player();
-player.teleport(50, 50);
 var Collider = /** @class */ (function (_super) {
     __extends(Collider, _super);
     function Collider(x, y, width, height) {
@@ -56,6 +59,14 @@ var Collider = /** @class */ (function (_super) {
     }
     return Collider;
 }(Entity));
+var Door = /** @class */ (function (_super) {
+    __extends(Door, _super);
+    function Door() {
+        return _super.call(this, 0, 0, new PIXI.Sprite(doorTexture)) || this;
+    }
+    return Door;
+}(Entity));
+var door = new Door();
 var colliders = [];
 colliders.push(new Collider(0, 0, 128, 8));
 colliders.push(new Collider(0, 0, 8, 128));
@@ -102,32 +113,6 @@ document.body.addEventListener("keyup", function (event) {
             break;
     }
 });
-function raycast(start, direction, obstacle) {
-    //check that the obstacle is correct height
-    if ((start.y >= obstacle.y && start.y <= obstacle.y + obstacle.height) ||
-        (start.y + start.height >= obstacle.y &&
-            start.y + start.height <= obstacle.y + obstacle.height)) {
-        if (direction > 0) {
-            if (obstacle.x >= start.x + start.width) {
-                return obstacle.x - (start.x + start.width);
-            }
-        }
-        else if (direction < 0) {
-            if (obstacle.x + obstacle.width <= start.x) {
-                return obstacle.x + obstacle.width - start.x;
-            }
-        }
-    }
-    if (direction > 0) {
-        return Infinity;
-    }
-    else {
-        return -Infinity;
-    }
-}
-function flip(input) {
-    return { x: input.y, y: input.x, width: input.height, height: input.width };
-}
 function update(delta) {
     if (player.direction > 0) {
         if (player.vx < 0) {
@@ -190,6 +175,7 @@ function draw(alpha) {
     player.interpolate(alpha);
     app.render();
 }
-MainLoop.setUpdate(update)
+MainLoop.setSimulationTimestep(1000 / 120)
+    .setUpdate(update)
     .setDraw(draw)
     .start();
