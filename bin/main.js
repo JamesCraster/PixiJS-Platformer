@@ -5,7 +5,7 @@ var __extends = (this && this.__extends) || (function () {
             ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
             function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
         return extendStatics(d, b);
-    }
+    };
     return function (d, b) {
         extendStatics(d, b);
         function __() { this.constructor = d; }
@@ -13,8 +13,16 @@ var __extends = (this && this.__extends) || (function () {
     };
 })();
 PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.NEAREST;
-var app = new PIXI.Application({ width: 128, height: 128, autoStart: false });
+var app = new PIXI.Application({ width: 128, height: 128, autoStart: false, forceCanvas: true });
 document.body.appendChild(app.view);
+var stopped = false;
+var frameCount = 0;
+var fps = 30;
+var fpsInterval = 1000 / fps;
+var startTime = Date.now();
+var then = startTime;
+var now = Date.now();
+var elapsed = now - then;
 app.stage.interactiveChildren = false;
 app.stage.scale.x = 4;
 app.stage.scale.y = 4;
@@ -41,7 +49,7 @@ var Player = /** @class */ (function (_super) {
         _this.jumps = 2;
         _this.jump = false;
         _this.direction = 0;
-        _this.speed = 0.07;
+        _this.speed = 2;
         _this.teleport(50, 50);
         return _this;
     }
@@ -119,32 +127,32 @@ function update(delta) {
             player.vx *= 0.9;
         }
         //player.sprite.scale.x = 1;
-        player.vx += 0.005;
+        player.vx = player.speed;
     }
     else if (player.direction < 0) {
         if (player.vx > 0) {
-            player.vx *= 0.9;
+            player.vx *= 0.75;
         }
         //player.sprite.scale.x = -1;
-        player.vx -= 0.005;
+        player.vx = -player.speed;
     }
     else {
-        player.vx *= 0.9;
+        player.vx *= 0.75;
     }
     //jumping
     if (player.jump && player.grounded) {
-        player.vy -= 0.27;
+        player.vy = -2;
     }
     player.jump = false;
     //gravity
-    player.vy += 0.01;
+    player.vy += 0.05;
     //limit speeds
-    player.vy = Math.max(player.vy, -0.5);
-    player.vy = Math.min(player.vy, 0.09);
+    player.vy = Math.max(player.vy, -4);
+    player.vy = Math.min(player.vy, 6);
     player.vx = Math.min(player.vx, player.speed);
     player.vx = Math.max(player.vx, -player.speed);
-    player.dx = player.vx * delta;
-    player.dy = player.vy * delta;
+    player.dx = player.vx;
+    player.dy = player.vy;
     if (player.dx > 0) {
         var distances = [];
         for (var i = 0; i < colliders.length; i++) {
@@ -183,10 +191,33 @@ function update(delta) {
     player.move(delta);
 }
 function draw(alpha) {
-    player.interpolate(alpha);
+    player.sprite.x = player.x;
+    player.sprite.y = player.y;
+    //player.interpolate(alpha);
     app.render();
 }
-MainLoop.setSimulationTimestep(1000 / 120)
-    .setUpdate(update)
-    .setDraw(draw)
-    .start();
+//MainLoop.setSimulationTimestep(1000 / 120)
+//.setUpdate(update)
+//.setDraw(draw)
+//.start();
+function animate() {
+    // stop
+    if (stopped) {
+        return;
+    }
+    // request another frame
+    requestAnimationFrame(animate);
+    // calc elapsed time since last loop
+    now = Date.now();
+    elapsed = now - then;
+    // if enough time has elapsed, draw the next frame
+    if (elapsed > fpsInterval) {
+        // Get ready for next frame by setting then=now, but...
+        // Also, adjust for fpsInterval not being multiple of 16.67
+        then = now - (elapsed % fpsInterval);
+        // draw stuff here
+        update(8);
+        draw(2);
+    }
+}
+animate();

@@ -1,6 +1,15 @@
 PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.NEAREST;
-const app = new PIXI.Application({ width: 128, height: 128, autoStart: false });
+const app = new PIXI.Application({ width: 128, height: 128, autoStart: false, forceCanvas:true });
 document.body.appendChild(app.view);
+
+let stopped = false;
+let frameCount = 0;
+let fps = 30;
+let fpsInterval = 1000/fps;
+let startTime = Date.now();
+let then = startTime;
+let now = Date.now();
+let elapsed = now - then;
 
 app.stage.interactiveChildren = false;
 app.stage.scale.x = 4;
@@ -34,7 +43,7 @@ class Player extends Entity {
   public jumps: number = 2;
   public jump: boolean = false;
   public direction: number = 0;
-  public speed: number = 0.07;
+  public speed: number = 2;
   constructor() {
     super(0, 0, new PIXI.Sprite(knightTexture));
     this.teleport(50, 50);
@@ -112,30 +121,30 @@ function update(delta: number) {
       player.vx *= 0.9;
     }
     //player.sprite.scale.x = 1;
-    player.vx += 0.005;
+    player.vx = player.speed;
   } else if (player.direction < 0) {
     if (player.vx > 0) {
-      player.vx *= 0.9;
+      player.vx *= 0.75;
     }
     //player.sprite.scale.x = -1;
-    player.vx -= 0.005;
+    player.vx = -player.speed;
   } else {
-    player.vx *= 0.9;
+    player.vx *= 0.75;
   }
   //jumping
   if (player.jump && player.grounded) {
-    player.vy -= 0.27;
+    player.vy = -2;
   }
   player.jump = false;
   //gravity
-  player.vy += 0.01;
+  player.vy += 0.05;
   //limit speeds
-  player.vy = Math.max(player.vy, -0.5);
-  player.vy = Math.min(player.vy, 0.09);
+  player.vy = Math.max(player.vy, -4);
+  player.vy = Math.min(player.vy, 6);
   player.vx = Math.min(player.vx, player.speed);
   player.vx = Math.max(player.vx, -player.speed);
-  player.dx = player.vx * delta;
-  player.dy = player.vy * delta;
+  player.dx = player.vx;
+  player.dy = player.vy;
 
   if (player.dx > 0) {
     let distances = [];
@@ -174,11 +183,45 @@ function update(delta: number) {
 }
 
 function draw(alpha: number) {
-  player.interpolate(alpha);
+  player.sprite.x = player.x;
+  player.sprite.y = player.y;
+  //player.interpolate(alpha);
   app.render();
 }
 
-MainLoop.setSimulationTimestep(1000 / 120)
-  .setUpdate(update)
-  .setDraw(draw)
-  .start();
+//MainLoop.setSimulationTimestep(1000 / 120)
+  //.setUpdate(update)
+  //.setDraw(draw)
+  //.start();
+  function animate() {
+
+    // stop
+    if (stopped) {
+        return;
+    }
+
+    // request another frame
+
+    requestAnimationFrame(animate);
+
+    // calc elapsed time since last loop
+
+    now = Date.now();
+    elapsed = now - then;
+
+    // if enough time has elapsed, draw the next frame
+
+    if (elapsed > fpsInterval) {
+
+        // Get ready for next frame by setting then=now, but...
+        // Also, adjust for fpsInterval not being multiple of 16.67
+        then = now - (elapsed % fpsInterval);
+
+        // draw stuff here
+        update(8);
+        draw(2);
+
+    }
+}
+
+animate();

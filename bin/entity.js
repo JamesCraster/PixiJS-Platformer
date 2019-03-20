@@ -56,12 +56,8 @@ var Entity = /** @class */ (function () {
     };
     //call in draw to position the sprite smoothly
     Entity.prototype.interpolate = function (alpha) {
-        this.sprite.x =
-            Math.floor((this._lastPos.x + (this.x - this._lastPos.x) * alpha) * 4) /
-                4;
-        this.sprite.y =
-            Math.floor((this._lastPos.y + (this.y - this._lastPos.y) * alpha) * 4) /
-                4;
+        this.sprite.x = Math.floor(this._lastPos.x * (1 - alpha) + (this.x) * alpha + 0.01);
+        this.sprite.y = Math.floor(this._lastPos.y * (1 - alpha) + (this.y) * alpha + 0.01);
     };
     return Entity;
 }());
