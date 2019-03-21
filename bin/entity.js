@@ -1,6 +1,6 @@
 "use strict";
-var Entity = /** @class */ (function () {
-    function Entity(x, y, sprite) {
+class Entity {
+    constructor(x, y, sprite) {
         this._x = x;
         this._y = y;
         this.vx = 0;
@@ -16,62 +16,46 @@ var Entity = /** @class */ (function () {
         this.spriteOffset = { x: 0, y: 0 };
         app.stage.addChild(sprite);
     }
-    Object.defineProperty(Entity.prototype, "x", {
-        get: function () {
-            return this._x;
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(Entity.prototype, "y", {
-        get: function () {
-            return this._y;
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(Entity.prototype, "width", {
-        get: function () {
-            return this.sprite.width;
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(Entity.prototype, "height", {
-        get: function () {
-            return this.sprite.height;
-        },
-        enumerable: true,
-        configurable: true
-    });
+    get x() {
+        return this._x;
+    }
+    get y() {
+        return this._y;
+    }
+    get width() {
+        return this.sprite.width;
+    }
+    get height() {
+        return this.sprite.height;
+    }
     //set the anchor of the entity (for scaling, rotation etc.)
     //x and y should each be between 0 and 1
-    Entity.prototype.setAnchor = function (x, y) {
-        var sprite = this.sprite;
+    setAnchor(x, y) {
+        let sprite = this.sprite;
         if (sprite.anchor) {
             sprite.anchor.x = x;
             sprite.anchor.y = y;
             this.spriteOffset.x = x * this.sprite.width;
             this.spriteOffset.y = y * this.sprite.height;
         }
-    };
+    }
     //only call for sudden movement, like teleportation, where the entity should jump to a new postion
     //without interpolation
-    Entity.prototype.teleport = function (x, y) {
+    teleport(x, y) {
         this._x = x;
         this._y = y;
         this._lastPos = { x: x, y: y };
         this.sprite.y = y;
         this.sprite.x = x;
-    };
+    }
     //call once and only once per physics update to move the entity
-    Entity.prototype.move = function (delta) {
+    move(delta) {
         this._lastPos = { x: this._x, y: this._y };
         this._x += this.dx;
         this._y += this.dy;
-    };
+    }
     //call in draw to position the sprite smoothly
-    Entity.prototype.interpolate = function (alpha) {
+    interpolate(alpha) {
         this.sprite.x =
             Math.floor((this._lastPos.x + (this.x - this._lastPos.x) * alpha) * 4) /
                 4 +
@@ -80,6 +64,5 @@ var Entity = /** @class */ (function () {
             Math.floor((this._lastPos.y + (this.y - this._lastPos.y) * alpha) * 4) /
                 4 +
                 this.spriteOffset.y;
-    };
-    return Entity;
-}());
+    }
+}

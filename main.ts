@@ -161,39 +161,19 @@ function update(delta: number) {
   player.dx = player.vx * delta;
   player.dy = player.vy * delta;
 
-  if (player.dx > 0) {
-    let distances = [];
-    for (let i = 0; i < colliders.length; i++) {
-      distances.push(raycast(player, player.dx, colliders[i]));
-    }
-    player.dx = Math.min(Math.min(...distances), player.dx);
-  } else {
-    let distances = [];
-    for (let i = 0; i < colliders.length; i++) {
-      distances.push(raycast(player, player.dx, colliders[i]));
-    }
-    player.dx = Math.max(Math.max(...distances), player.dx);
-  }
+  let playerCollision = allowedMovement(player, colliders);
+  player.dx = playerCollision.dx;
+  player.dy = playerCollision.dy;
+  
   player.grounded = false;
-  if (player.dy < 0) {
-    let distances = [];
-    for (let i = 0; i < colliders.length; i++) {
-      distances.push(raycast(flip(player), player.dy, flip(colliders[i])));
+
+  if (playerCollision.down) {
+    player.grounded = true;
+    if (player.vy > 0) {
+      player.vy = 0;
     }
-    player.dy = Math.max(player.dy, Math.max(...distances));
-  } else {
-    let distances = [];
-    for (let i = 0; i < colliders.length; i++) {
-      distances.push(raycast(flip(player), player.dy, flip(colliders[i])));
-    }
-    if (player.dy > Math.min(...distances)) {
-      player.grounded = true;
-      if (player.vy > 0) {
-        player.vy = 0;
-      }
-    }
-    player.dy = Math.min(player.dy, Math.min(...distances));
   }
+  
   player.move(delta);
 }
 

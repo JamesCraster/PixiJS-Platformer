@@ -1,26 +1,9 @@
-function raycast(
-  start: {
-    x: number;
-    y: number;
-    height: number;
-    width: number;
-  },
-  direction: number,
-  obstacle: {
-    x: number;
-    y: number;
-    height: number;
-    width: number;
-  },
-) {
+//The functions in this file are all pure - the readonly property ensures there are no side effects
+type Rectangle = Readonly<{x: number, y: number, height: number, width: number}>
+
+function raycast(start: Rectangle, direction: number, obstacle: Rectangle) {
   //check that the obstacle is correct height
-  if (
-    (start.y > obstacle.y && start.y < obstacle.y + obstacle.height) ||
-    (start.y + start.height > obstacle.y &&
-      start.y + start.height < obstacle.y + obstacle.height) ||
-    (start.y == obstacle.y &&
-      start.y + start.height == obstacle.y + obstacle.height)
-  ) {
+  if (intersectEdge(start, obstacle)) {
     if (direction > 0) {
       if (obstacle.x + 0.05 >= start.x + start.width) {
         return obstacle.x - (start.x + start.width);
@@ -39,32 +22,67 @@ function raycast(
 }
 //swap x and y, and width and height properties, so the code for raycasting in the x-direction
 //can be used for raycasting in the y-direction
-function flip(input: { x: number; y: number; width: number; height: number }) {
+function flip(input: Rectangle): Rectangle {
   return { x: input.y, y: input.x, width: input.height, height: input.width };
 }
 
-function intersectEdge(
-  start: {
-    y: number;
-    height: number;
-  },
-  obstacle: {
-    y: number;
-    height: number;
-  },
-) {
+function intersectEdge(a: { y: number; height: number; }, b: { y: number; height: number; }) {
   return (
-    (start.y > obstacle.y && start.y < obstacle.y + obstacle.height) ||
-    (start.y + start.height > obstacle.y &&
-      start.y + start.height < obstacle.y + obstacle.height)
+    (a.y > b.y && a.y < b.y + b.height) ||
+    (a.y + a.height > b.y &&
+      a.y + a.height < b.y + b.height) ||
+    (a.y == b.y &&
+      a.y + a.height == b.y + b.height)
   );
 }
 
-function intersect(
-  start: { x: number; y: number; width: number; height: number },
-  obstacle: { x: number; y: number; width: number; height: number },
-) {
-  return (
-    intersectEdge(start, obstacle) && intersectEdge(flip(start), flip(obstacle))
-  );
+let intersect = (start: Rectangle, obstacle: Rectangle) => {
+  return intersectEdge(start, obstacle) && intersectEdge(flip(start), flip(obstacle));
+}
+
+function allowedMovement(player: { readonly dx: number, readonly dy: number } & Rectangle, colliders: Readonly<Array<Rectangle>>) {
+  let output = { dx: player.dx, dy: player.dy, up: false, down: false, left: false, right: false };
+  if (player.dx > 0) {
+    let distances = [];
+    for (let i = 0; i < colliders.length; i++) {
+      distances.push(raycast(player, player.dx, colliders[i]));
+    }
+    const minDist =  Math.min(...distances);
+    if(minDist < player.dx){
+      output.dx = minDist;
+      output.right = true;
+    }
+  } else {
+    let distances = [];
+    for (let i = 0; i < colliders.length; i++) {
+      distances.push(raycast(player, player.dx, colliders[i]));
+    }
+    const maxDist =  Math.max(...distances);
+    if(maxDist > player.dx){
+      output.dx = maxDist;
+      output.left = true;
+    }
+  }
+  if (player.dy < 0) {
+    let distances = [];
+    for (let i = 0; i < colliders.length; i++) {
+      distances.push(raycast(flip(player), player.dy, flip(colliders[i])));
+    }
+    const maxDist =  Math.max(...distances);
+    if(maxDist > player.dy){
+      output.dy = maxDist;
+      output.up = true;
+    }
+  } else {
+    let distances = [];
+    for (let i = 0; i < colliders.length; i++) {
+      distances.push(raycast(flip(player), player.dy, flip(colliders[i])));
+    }
+    const minDist =  Math.min(...distances);
+    if(minDist < player.dy){
+      output.dy = minDist;
+      output.down = true;
+    }
+  }
+  return output;
 }
