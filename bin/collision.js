@@ -1,10 +1,11 @@
 "use strict";
 function raycast(start, direction, obstacle) {
     //check that the obstacle is correct height
-    if ((start.y + 0.05 >= obstacle.y &&
-        start.y <= obstacle.y + obstacle.height + 0.05) ||
-        (start.y + start.height + 0.05 >= obstacle.y &&
-            start.y + start.height <= obstacle.y + obstacle.height + 0.05)) {
+    if ((start.y > obstacle.y && start.y < obstacle.y + obstacle.height) ||
+        (start.y + start.height > obstacle.y &&
+            start.y + start.height < obstacle.y + obstacle.height) ||
+        (start.y == obstacle.y &&
+            start.y + start.height == obstacle.y + obstacle.height)) {
         if (direction > 0) {
             if (obstacle.x + 0.05 >= start.x + start.width) {
                 return obstacle.x - (start.x + start.width);

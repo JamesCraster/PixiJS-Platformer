@@ -29,25 +29,27 @@ var scoreText = new PIXI.Text("0", {
 scoreText.scale.x = 0.25;
 scoreText.scale.y = 0.25;
 app.stage.addChild(scoreText);
-var knightTexture = new PIXI.Texture(PIXI.Texture.fromImage("knight.png").baseTexture, new PIXI.Rectangle(0, 0, 8, 8));
-var knightTexture2 = new PIXI.Texture(PIXI.Texture.fromImage("knight.png").baseTexture, new PIXI.Rectangle(0, 8, 8, 8));
-var brickTexture = PIXI.Texture.fromImage("brick.png");
-var doorTexture = PIXI.Texture.fromImage("door.png");
-var Player = /** @class */ (function (_super) {
-    __extends(Player, _super);
-    function Player() {
-        var _this = _super.call(this, 0, 0, new PIXI.Sprite(knightTexture)) || this;
-        _this.grounded = false;
-        _this.jumps = 2;
-        _this.jump = false;
-        _this.direction = 0;
-        _this.speed = 0.07;
-        _this.teleport(50, 50);
-        return _this;
-    }
-    return Player;
-}(Entity));
-var player = new Player();
+var knightTexture = new PIXI.Texture(PIXI.Texture.fromImage("s4m_ur4i-8x8-pico-8-free-tiles.png").baseTexture, new PIXI.Rectangle(8, 0, 8, 8));
+var stage = [
+    [1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0],
+    [1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0],
+    [1, 1, 1, 1, 0, 0, 0, 1, 1, 0, 0, 0, 2, 0, 0, 1],
+    [1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 2, 0, 0, 1],
+    [1, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 2, 0, 0, 1],
+    [1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 2, 0, 0, 1],
+    [1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 2, 0, 0, 1],
+    [1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 2, 0, 0, 1],
+    [1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0],
+    [1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0],
+    [1, 1, 1, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1],
+    [1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1],
+    [1, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1],
+    [1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1],
+    [1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1],
+    [1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1],
+];
+var brickTexture = new PIXI.Texture(PIXI.Texture.fromImage("s4m_ur4i-8x8-pico-8-free-tiles.png").baseTexture, new PIXI.Rectangle(0, 8, 8, 8));
+var ladderTexture = new PIXI.Texture(PIXI.Texture.fromImage("s4m_ur4i-8x8-pico-8-free-tiles.png").baseTexture, new PIXI.Rectangle(8 * 6, 0, 8, 8));
 var Collider = /** @class */ (function (_super) {
     __extends(Collider, _super);
     function Collider(x, y, width, height) {
@@ -59,6 +61,42 @@ var Collider = /** @class */ (function (_super) {
     }
     return Collider;
 }(Entity));
+var Ladder = /** @class */ (function (_super) {
+    __extends(Ladder, _super);
+    function Ladder(x, y) {
+        var _this = _super.call(this, 0, 0, new PIXI.Sprite(ladderTexture)) || this;
+        _this.teleport(x, y);
+        return _this;
+    }
+    return Ladder;
+}(Entity));
+var colliders = [];
+for (var x = 0; x < stage.length; x++) {
+    for (var y = 0; y < stage.length; y++) {
+        if (stage[y][x] == 1) {
+            colliders.push(new Collider(x * 8, y * 8, 8, 8));
+        }
+        else if (stage[y][x] == 2) {
+            new Ladder(x * 8, y * 8);
+        }
+    }
+}
+var doorTexture = PIXI.Texture.fromImage("door.png");
+var Player = /** @class */ (function (_super) {
+    __extends(Player, _super);
+    function Player() {
+        var _this = _super.call(this, 0, 0, new PIXI.Sprite(knightTexture)) || this;
+        _this.grounded = false;
+        _this.jumps = 2;
+        _this.jump = false;
+        _this.direction = 0;
+        _this.speed = 0.07;
+        _this.teleport(20, 100);
+        return _this;
+    }
+    return Player;
+}(Entity));
+var player = new Player();
 var Door = /** @class */ (function (_super) {
     __extends(Door, _super);
     function Door() {
@@ -67,18 +105,6 @@ var Door = /** @class */ (function (_super) {
     return Door;
 }(Entity));
 var door = new Door();
-var colliders = [];
-colliders.push(new Collider(0, 0, 128, 8));
-colliders.push(new Collider(0, 0, 8, 128));
-//colliders.push(new Collider(0, 1418, 128, 8));
-colliders.push(new Collider(120, 0, 8, 128));
-//colliders.push(new Collider(120, 0, 16, 128));
-colliders.push(new Collider(0, 120, 128, 8));
-//colliders.push(new Collider(120, 0, 8, 128));
-colliders.push(new Collider(20, 20, 8, 8));
-colliders.push(new Collider(80, 20, 8, 8));
-colliders.push(new Collider(100, 20, 8, 8));
-//colliders.push(new Collider(20, 28 + 8, 8, 8));
 document.body.addEventListener("keydown", function (event) {
     switch (event.keyCode) {
         case 38:
@@ -114,6 +140,7 @@ document.body.addEventListener("keyup", function (event) {
     }
 });
 function update(delta) {
+    //console.log(delta);
     if (player.direction > 0) {
         if (player.vx < 0) {
             player.vx *= 0.9;
@@ -183,6 +210,7 @@ function update(delta) {
     player.move(delta);
 }
 function draw(alpha) {
+    //console.log(alpha);
     player.interpolate(alpha);
     app.render();
 }

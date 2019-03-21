@@ -19,14 +19,61 @@ scoreText.scale.y = 0.25;
 
 app.stage.addChild(scoreText);
 let knightTexture = new PIXI.Texture(
-  PIXI.Texture.fromImage("knight.png").baseTexture,
-  new PIXI.Rectangle(0, 0, 8, 8),
+  PIXI.Texture.fromImage("s4m_ur4i-8x8-pico-8-free-tiles.png").baseTexture,
+  new PIXI.Rectangle(8, 0, 8, 8),
 );
-let knightTexture2 = new PIXI.Texture(
-  PIXI.Texture.fromImage("knight.png").baseTexture,
+const stage = [
+  [1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0],
+  [1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0],
+  [1, 1, 1, 1, 0, 0, 0, 1, 1, 0, 0, 0, 2, 0, 0, 1],
+  [1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 2, 0, 0, 1],
+  [1, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 2, 0, 0, 1],
+  [1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 2, 0, 0, 1],
+  [1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 2, 0, 0, 1],
+  [1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 2, 0, 0, 1],
+  [1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0],
+  [1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0],
+  [1, 1, 1, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1],
+  [1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1],
+  [1, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1],
+  [1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1],
+  [1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1],
+  [1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1],
+];
+
+let brickTexture = new PIXI.Texture(
+  PIXI.Texture.fromImage("s4m_ur4i-8x8-pico-8-free-tiles.png").baseTexture,
   new PIXI.Rectangle(0, 8, 8, 8),
 );
-let brickTexture = PIXI.Texture.fromImage("brick.png");
+let ladderTexture = new PIXI.Texture(
+  PIXI.Texture.fromImage("s4m_ur4i-8x8-pico-8-free-tiles.png").baseTexture,
+  new PIXI.Rectangle(8 * 6, 0, 8, 8),
+);
+class Collider extends Entity {
+  constructor(x: number, y: number, width: number, height: number) {
+    super(0, 0, new PIXI.extras.TilingSprite(brickTexture, width, height));
+    this.teleport(x, y);
+    this.sprite.width = width;
+    this.sprite.height = height;
+  }
+}
+class Ladder extends Entity {
+  constructor(x: number, y: number) {
+    super(0, 0, new PIXI.Sprite(ladderTexture));
+    this.teleport(x, y);
+  }
+}
+const colliders: Array<Collider> = [];
+for (let x = 0; x < stage.length; x++) {
+  for (let y = 0; y < stage.length; y++) {
+    if (stage[y][x] == 1) {
+      colliders.push(new Collider(x * 8, y * 8, 8, 8));
+    } else if (stage[y][x] == 2) {
+      new Ladder(x * 8, y * 8);
+    }
+  }
+}
+
 let doorTexture = PIXI.Texture.fromImage("door.png");
 
 class Player extends Entity {
@@ -37,20 +84,11 @@ class Player extends Entity {
   public speed: number = 0.07;
   constructor() {
     super(0, 0, new PIXI.Sprite(knightTexture));
-    this.teleport(50, 50);
+    this.teleport(20, 100);
   }
 }
 
 const player = new Player();
-
-class Collider extends Entity {
-  constructor(x: number, y: number, width: number, height: number) {
-    super(0, 0, new PIXI.extras.TilingSprite(brickTexture, width, height));
-    this.teleport(x, y);
-    this.sprite.width = width;
-    this.sprite.height = height;
-  }
-}
 
 class Door extends Entity {
   constructor() {
@@ -58,18 +96,6 @@ class Door extends Entity {
   }
 }
 let door = new Door();
-const colliders: Array<Collider> = [];
-colliders.push(new Collider(0, 0, 128, 8));
-colliders.push(new Collider(0, 0, 8, 128));
-//colliders.push(new Collider(0, 1418, 128, 8));
-colliders.push(new Collider(120, 0, 8, 128));
-//colliders.push(new Collider(120, 0, 16, 128));
-colliders.push(new Collider(0, 120, 128, 8));
-//colliders.push(new Collider(120, 0, 8, 128));
-colliders.push(new Collider(20, 20, 8, 8));
-colliders.push(new Collider(80, 20, 8, 8));
-colliders.push(new Collider(100, 20, 8, 8));
-//colliders.push(new Collider(20, 28 + 8, 8, 8));
 document.body.addEventListener("keydown", event => {
   switch (event.keyCode) {
     case 38:
@@ -107,6 +133,7 @@ document.body.addEventListener("keyup", event => {
 });
 
 function update(delta: number) {
+  //console.log(delta);
   if (player.direction > 0) {
     if (player.vx < 0) {
       player.vx *= 0.9;
@@ -174,6 +201,7 @@ function update(delta: number) {
 }
 
 function draw(alpha: number) {
+  //console.log(alpha);
   player.interpolate(alpha);
   app.render();
 }
