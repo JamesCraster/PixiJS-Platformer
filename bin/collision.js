@@ -35,50 +35,48 @@ function intersectEdge(a, b) {
 let intersect = (start, obstacle) => {
     return intersectEdge(start, obstacle) && intersectEdge(flip(start), flip(obstacle));
 };
-function allowedMovement(player, colliders) {
-    let output = { dx: player.dx, dy: player.dy, up: false, down: false, left: false, right: false };
-    if (player.dx > 0) {
+function collide(player, colliders, delta) {
+    let output = { vx: player.vx, vy: player.vy, up: false, down: false, left: false, right: false };
+    const dx = player.vx * delta;
+    if (dx != 0) {
         let distances = [];
         for (let i = 0; i < colliders.length; i++) {
-            distances.push(raycast(player, player.dx, colliders[i]));
+            distances.push(raycast(player, dx, colliders[i]));
         }
-        const minDist = Math.min(...distances);
-        if (minDist < player.dx) {
-            output.dx = minDist;
-            output.right = true;
+        if (dx > 0) {
+            const minDist = Math.min(...distances);
+            if (minDist < dx) {
+                output.vx = minDist / delta;
+                output.right = true;
+            }
+        }
+        else {
+            const maxDist = Math.max(...distances);
+            if (maxDist > dx) {
+                output.vx = maxDist / delta;
+                output.left = true;
+            }
         }
     }
-    else {
+    const dy = player.vy * delta;
+    if (dy != 0) {
         let distances = [];
         for (let i = 0; i < colliders.length; i++) {
-            distances.push(raycast(player, player.dx, colliders[i]));
+            distances.push(raycast(flip(player), dy, flip(colliders[i])));
         }
-        const maxDist = Math.max(...distances);
-        if (maxDist > player.dx) {
-            output.dx = maxDist;
-            output.left = true;
+        if (dy < 0) {
+            const maxDist = Math.max(...distances);
+            if (maxDist > dy) {
+                output.vy = maxDist / delta;
+                output.up = true;
+            }
         }
-    }
-    if (player.dy < 0) {
-        let distances = [];
-        for (let i = 0; i < colliders.length; i++) {
-            distances.push(raycast(flip(player), player.dy, flip(colliders[i])));
-        }
-        const maxDist = Math.max(...distances);
-        if (maxDist > player.dy) {
-            output.dy = maxDist;
-            output.up = true;
-        }
-    }
-    else {
-        let distances = [];
-        for (let i = 0; i < colliders.length; i++) {
-            distances.push(raycast(flip(player), player.dy, flip(colliders[i])));
-        }
-        const minDist = Math.min(...distances);
-        if (minDist < player.dy) {
-            output.dy = minDist;
-            output.down = true;
+        else {
+            const minDist = Math.min(...distances);
+            if (minDist < dy) {
+                output.vy = minDist / delta;
+                output.down = true;
+            }
         }
     }
     return output;

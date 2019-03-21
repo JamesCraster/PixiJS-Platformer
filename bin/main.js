@@ -11,6 +11,8 @@ let spriteSheet = PIXI.Texture.fromImage("s4m_ur4i-8x8-pico-8-free-tiles.png")
 let playerTexture = new PIXI.Texture(spriteSheet, new PIXI.Rectangle(8, 0, 8, 8));
 let brickTexture = new PIXI.Texture(spriteSheet, new PIXI.Rectangle(0, 8, 8, 8));
 let ladderTexture = new PIXI.Texture(spriteSheet, new PIXI.Rectangle(8 * 6, 0, 8, 8));
+let batTexture = new PIXI.Texture(spriteSheet, new PIXI.Rectangle(8 * 8, 8 * 2, 16, 8));
+let torchTexture = new PIXI.Texture(spriteSheet, new PIXI.Rectangle(8 * 6, 8 * 3, 8, 8));
 const stage = [
     [1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0],
     [1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0],
@@ -28,6 +30,24 @@ const stage = [
     [1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1],
     [1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1],
     [1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1],
+];
+const cosmeticStage = [
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
 ];
 class Collider extends Entity {
     constructor(x, y, width, height) {
@@ -53,6 +73,18 @@ for (let x = 0; x < stage.length; x++) {
         }
     }
 }
+for (let x = 0; x < cosmeticStage.length; x++) {
+    for (let y = 0; y < cosmeticStage.length; y++) {
+        switch (cosmeticStage[y][x]) {
+            case 1:
+                let torch = new PIXI.Sprite(torchTexture);
+                torch.x = x * 8;
+                torch.y = y * 8;
+                app.stage.addChild(torch);
+                break;
+        }
+    }
+}
 class Player extends Entity {
     constructor() {
         super(20, 100, new PIXI.Sprite(playerTexture));
@@ -62,10 +94,19 @@ class Player extends Entity {
         this.direction = 0;
         this.speed = 0.07;
         this.up = false;
+        this.setAnchor(0.35, 0);
+        this.width = 7;
+        this.height = 7;
+        this.spriteOffset.x -= 0.5;
+        this.spriteOffset.y -= 1;
+    }
+}
+class Bat extends Entity {
+    constructor(x, y) {
+        super(x, y, new PIXI.Sprite(batTexture));
     }
 }
 const player = new Player();
-player.setAnchor(0.35, 0);
 document.body.addEventListener("keydown", event => {
     switch (event.keyCode) {
         case 38:
@@ -139,11 +180,9 @@ function update(delta) {
     player.vy = Math.min(player.vy, 0.09);
     player.vx = Math.min(player.vx, player.speed);
     player.vx = Math.max(player.vx, -player.speed);
-    player.dx = player.vx * delta;
-    player.dy = player.vy * delta;
-    let playerCollision = allowedMovement(player, colliders);
-    player.dx = playerCollision.dx;
-    player.dy = playerCollision.dy;
+    let playerCollision = collide(player, colliders, delta);
+    player.vx = playerCollision.vx;
+    player.vy = playerCollision.vy;
     player.grounded = false;
     if (playerCollision.down) {
         player.grounded = true;

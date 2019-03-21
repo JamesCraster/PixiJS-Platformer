@@ -1,7 +1,7 @@
 //The functions in this file are all pure - the readonly property ensures there are no side effects
-type Rectangle = Readonly<{x: number, y: number, height: number, width: number}>
+type Rectangle = Readonly<{ x: number, y: number, height: number, width: number }>
 
-function raycast(start: Rectangle, direction: number, obstacle: Rectangle) {
+function raycast(start: Rectangle, direction: Readonly<number>, obstacle: Rectangle) {
   //check that the obstacle is correct height
   if (intersectEdge(start, obstacle)) {
     if (direction > 0) {
@@ -26,7 +26,7 @@ function flip(input: Rectangle): Rectangle {
   return { x: input.y, y: input.x, width: input.height, height: input.width };
 }
 
-function intersectEdge(a: { y: number; height: number; }, b: { y: number; height: number; }) {
+function intersectEdge(a: Readonly<{ y: number; height: number; }>, b: Readonly<{ y: number; height: number; }>) {
   return (
     (a.y > b.y && a.y < b.y + b.height) ||
     (a.y + a.height > b.y &&
@@ -40,48 +40,46 @@ let intersect = (start: Rectangle, obstacle: Rectangle) => {
   return intersectEdge(start, obstacle) && intersectEdge(flip(start), flip(obstacle));
 }
 
-function allowedMovement(player: { readonly dx: number, readonly dy: number } & Rectangle, colliders: Readonly<Array<Rectangle>>) {
-  let output = { dx: player.dx, dy: player.dy, up: false, down: false, left: false, right: false };
-  if (player.dx > 0) {
+function collide(player: Readonly<{ vx: number, vy: number }> & Rectangle, colliders: Readonly<Array<Rectangle>>, delta: Readonly<number>) {
+  let output = { vx: player.vx, vy: player.vy, up: false, down: false, left: false, right: false };
+  const dx = player.vx * delta;
+  if (dx != 0) {
     let distances = [];
     for (let i = 0; i < colliders.length; i++) {
-      distances.push(raycast(player, player.dx, colliders[i]));
+      distances.push(raycast(player, dx, colliders[i]));
     }
-    const minDist =  Math.min(...distances);
-    if(minDist < player.dx){
-      output.dx = minDist;
-      output.right = true;
-    }
-  } else {
-    let distances = [];
-    for (let i = 0; i < colliders.length; i++) {
-      distances.push(raycast(player, player.dx, colliders[i]));
-    }
-    const maxDist =  Math.max(...distances);
-    if(maxDist > player.dx){
-      output.dx = maxDist;
-      output.left = true;
+    if (dx > 0) {
+      const minDist = Math.min(...distances);
+      if (minDist < dx) {
+        output.vx = minDist / delta;
+        output.right = true;
+      }
+    } else {
+      const maxDist = Math.max(...distances);
+      if (maxDist > dx) {
+        output.vx = maxDist / delta;
+        output.left = true;
+      }
     }
   }
-  if (player.dy < 0) {
+  const dy = player.vy * delta;
+  if (dy != 0) {
     let distances = [];
     for (let i = 0; i < colliders.length; i++) {
-      distances.push(raycast(flip(player), player.dy, flip(colliders[i])));
+      distances.push(raycast(flip(player), dy, flip(colliders[i])));
     }
-    const maxDist =  Math.max(...distances);
-    if(maxDist > player.dy){
-      output.dy = maxDist;
-      output.up = true;
-    }
-  } else {
-    let distances = [];
-    for (let i = 0; i < colliders.length; i++) {
-      distances.push(raycast(flip(player), player.dy, flip(colliders[i])));
-    }
-    const minDist =  Math.min(...distances);
-    if(minDist < player.dy){
-      output.dy = minDist;
-      output.down = true;
+    if (dy < 0) {
+      const maxDist = Math.max(...distances);
+      if (maxDist > dy) {
+        output.vy = maxDist / delta;
+        output.up = true;
+      }
+    } else {
+      const minDist = Math.min(...distances);
+      if (minDist < dy) {
+        output.vy = minDist / delta;
+        output.down = true;
+      }
     }
   }
   return output;

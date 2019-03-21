@@ -5,8 +5,6 @@ class Entity {
         this._y = y;
         this.vx = 0;
         this.vy = 0;
-        this.dx = 0;
-        this.dy = 0;
         this._lastPos = { x: x, y: y };
         this.sprite = sprite;
         this.sprite.x = x;
@@ -14,6 +12,8 @@ class Entity {
         this.sprite.pivot.x = 0.5;
         this.sprite.pivot.y = 0.5;
         this.spriteOffset = { x: 0, y: 0 };
+        this.width = this.sprite.width;
+        this.height = this.sprite.height;
         app.stage.addChild(sprite);
     }
     get x() {
@@ -22,13 +22,7 @@ class Entity {
     get y() {
         return this._y;
     }
-    get width() {
-        return this.sprite.width;
-    }
-    get height() {
-        return this.sprite.height;
-    }
-    //set the anchor of the entity (for scaling, rotation etc.)
+    //set the anchor of the entity (for scaling, rotation etc.) - adjusts the sprite to avoid changing position
     //x and y should each be between 0 and 1
     setAnchor(x, y) {
         let sprite = this.sprite;
@@ -51,8 +45,8 @@ class Entity {
     //call once and only once per physics update to move the entity
     move(delta) {
         this._lastPos = { x: this._x, y: this._y };
-        this._x += this.dx;
-        this._y += this.dy;
+        this._x += this.vx * delta;
+        this._y += this.vy * delta;
     }
     //call in draw to position the sprite smoothly
     interpolate(alpha) {

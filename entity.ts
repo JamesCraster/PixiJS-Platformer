@@ -3,22 +3,16 @@ class Entity {
   private _y: number;
   public vx: number;
   public vy: number;
-  public dx: number;
-  public dy: number;
   private _lastPos: { x: number; y: number };
   public spriteOffset: { x: number; y: number };
   public sprite: PIXI.DisplayObject & { width: number; height: number };
-  constructor(
-    x: number,
-    y: number,
-    sprite: PIXI.DisplayObject & { width: number; height: number },
-  ) {
+  public width: number;
+  public height: number;
+  constructor(x: number, y: number, sprite: PIXI.DisplayObject & { width: number; height: number }) {
     this._x = x;
     this._y = y;
     this.vx = 0;
     this.vy = 0;
-    this.dx = 0;
-    this.dy = 0;
     this._lastPos = { x: x, y: y };
     this.sprite = sprite;
     this.sprite.x = x;
@@ -26,6 +20,8 @@ class Entity {
     this.sprite.pivot.x = 0.5;
     this.sprite.pivot.y = 0.5;
     this.spriteOffset = { x: 0, y: 0 };
+    this.width = this.sprite.width;
+    this.height = this.sprite.height;
     app.stage.addChild(sprite);
   }
   get x() {
@@ -34,13 +30,7 @@ class Entity {
   get y() {
     return this._y;
   }
-  get width() {
-    return this.sprite.width;
-  }
-  get height() {
-    return this.sprite.height;
-  }
-  //set the anchor of the entity (for scaling, rotation etc.)
+  //set the anchor of the entity (for scaling, rotation etc.) - adjusts the sprite to avoid changing position
   //x and y should each be between 0 and 1
   setAnchor(x: number, y: number) {
     let sprite = this.sprite as PIXI.Sprite;
@@ -63,18 +53,18 @@ class Entity {
   //call once and only once per physics update to move the entity
   move(delta: number) {
     this._lastPos = { x: this._x, y: this._y };
-    this._x += this.dx;
-    this._y += this.dy;
+    this._x += this.vx * delta;
+    this._y += this.vy * delta;
   }
   //call in draw to position the sprite smoothly
   interpolate(alpha: number) {
     this.sprite.x =
       Math.floor((this._lastPos.x + (this.x - this._lastPos.x) * alpha) * 4) /
-        4 +
+      4 +
       this.spriteOffset.x;
     this.sprite.y =
       Math.floor((this._lastPos.y + (this.y - this._lastPos.y) * alpha) * 4) /
-        4 +
+      4 +
       this.spriteOffset.y;
   }
 }
