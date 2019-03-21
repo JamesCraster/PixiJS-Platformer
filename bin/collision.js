@@ -29,3 +29,11 @@ function raycast(start, direction, obstacle) {
 function flip(input) {
     return { x: input.y, y: input.x, width: input.height, height: input.width };
 }
+function intersectEdge(start, obstacle) {
+    return ((start.y > obstacle.y && start.y < obstacle.y + obstacle.height) ||
+        (start.y + start.height > obstacle.y &&
+            start.y + start.height < obstacle.y + obstacle.height));
+}
+function intersect(start, obstacle) {
+    return (intersectEdge(start, obstacle) && intersectEdge(flip(start), flip(obstacle)));
+}

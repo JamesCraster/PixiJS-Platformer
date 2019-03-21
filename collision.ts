@@ -42,3 +42,29 @@ function raycast(
 function flip(input: { x: number; y: number; width: number; height: number }) {
   return { x: input.y, y: input.x, width: input.height, height: input.width };
 }
+
+function intersectEdge(
+  start: {
+    y: number;
+    height: number;
+  },
+  obstacle: {
+    y: number;
+    height: number;
+  },
+) {
+  return (
+    (start.y > obstacle.y && start.y < obstacle.y + obstacle.height) ||
+    (start.y + start.height > obstacle.y &&
+      start.y + start.height < obstacle.y + obstacle.height)
+  );
+}
+
+function intersect(
+  start: { x: number; y: number; width: number; height: number },
+  obstacle: { x: number; y: number; width: number; height: number },
+) {
+  return (
+    intersectEdge(start, obstacle) && intersectEdge(flip(start), flip(obstacle))
+  );
+}

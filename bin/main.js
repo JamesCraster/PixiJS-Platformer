@@ -19,17 +19,11 @@ app.stage.interactiveChildren = false;
 app.stage.scale.x = 4;
 app.stage.scale.y = 4;
 app.renderer.resize(128 * 4, 128 * 4);
-var score = 0;
-var scoreText = new PIXI.Text("0", {
-    fontFamily: "Arial",
-    fontSize: 24,
-    fill: 0xff1010,
-    align: "center",
-});
-scoreText.scale.x = 0.25;
-scoreText.scale.y = 0.25;
-app.stage.addChild(scoreText);
-var knightTexture = new PIXI.Texture(PIXI.Texture.fromImage("s4m_ur4i-8x8-pico-8-free-tiles.png").baseTexture, new PIXI.Rectangle(8, 0, 8, 8));
+var spriteSheet = PIXI.Texture.fromImage("s4m_ur4i-8x8-pico-8-free-tiles.png")
+    .baseTexture;
+var playerTexture = new PIXI.Texture(spriteSheet, new PIXI.Rectangle(8, 0, 8, 8));
+var brickTexture = new PIXI.Texture(spriteSheet, new PIXI.Rectangle(0, 8, 8, 8));
+var ladderTexture = new PIXI.Texture(spriteSheet, new PIXI.Rectangle(8 * 6, 0, 8, 8));
 var stage = [
     [1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0],
     [1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0],
@@ -48,67 +42,55 @@ var stage = [
     [1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1],
     [1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1],
 ];
-var brickTexture = new PIXI.Texture(PIXI.Texture.fromImage("s4m_ur4i-8x8-pico-8-free-tiles.png").baseTexture, new PIXI.Rectangle(0, 8, 8, 8));
-var ladderTexture = new PIXI.Texture(PIXI.Texture.fromImage("s4m_ur4i-8x8-pico-8-free-tiles.png").baseTexture, new PIXI.Rectangle(8 * 6, 0, 8, 8));
 var Collider = /** @class */ (function (_super) {
     __extends(Collider, _super);
     function Collider(x, y, width, height) {
-        var _this = _super.call(this, 0, 0, new PIXI.extras.TilingSprite(brickTexture, width, height)) || this;
-        _this.teleport(x, y);
-        _this.sprite.width = width;
-        _this.sprite.height = height;
-        return _this;
+        return _super.call(this, x, y, new PIXI.extras.TilingSprite(brickTexture, width, height)) || this;
     }
     return Collider;
 }(Entity));
 var Ladder = /** @class */ (function (_super) {
     __extends(Ladder, _super);
     function Ladder(x, y) {
-        var _this = _super.call(this, 0, 0, new PIXI.Sprite(ladderTexture)) || this;
-        _this.teleport(x, y);
-        return _this;
+        return _super.call(this, x, y, new PIXI.Sprite(ladderTexture)) || this;
     }
     return Ladder;
 }(Entity));
 var colliders = [];
+var ladders = [];
 for (var x = 0; x < stage.length; x++) {
     for (var y = 0; y < stage.length; y++) {
-        if (stage[y][x] == 1) {
-            colliders.push(new Collider(x * 8, y * 8, 8, 8));
-        }
-        else if (stage[y][x] == 2) {
-            new Ladder(x * 8, y * 8);
+        switch (stage[y][x]) {
+            case 1:
+                colliders.push(new Collider(x * 8, y * 8, 8, 8));
+                break;
+            case 2:
+                ladders.push(new Ladder(x * 8, y * 8));
+                break;
         }
     }
 }
-var doorTexture = PIXI.Texture.fromImage("door.png");
 var Player = /** @class */ (function (_super) {
     __extends(Player, _super);
     function Player() {
-        var _this = _super.call(this, 0, 0, new PIXI.Sprite(knightTexture)) || this;
+        var _this = _super.call(this, 20, 100, new PIXI.Sprite(playerTexture)) || this;
         _this.grounded = false;
         _this.jumps = 2;
         _this.jump = false;
         _this.direction = 0;
         _this.speed = 0.07;
-        _this.teleport(20, 100);
+        _this.up = false;
         return _this;
     }
     return Player;
 }(Entity));
 var player = new Player();
-var Door = /** @class */ (function (_super) {
-    __extends(Door, _super);
-    function Door() {
-        return _super.call(this, 0, 0, new PIXI.Sprite(doorTexture)) || this;
-    }
-    return Door;
-}(Entity));
-var door = new Door();
+player.setAnchor(0.35, 0);
 document.body.addEventListener("keydown", function (event) {
     switch (event.keyCode) {
         case 38:
             player.jump = true;
+            player.up = true;
             break;
         case 40:
             player.vy = player.speed;
@@ -124,6 +106,7 @@ document.body.addEventListener("keydown", function (event) {
 document.body.addEventListener("keyup", function (event) {
     switch (event.keyCode) {
         case 38:
+            player.up = false;
             break;
         case 40:
             break;
@@ -140,19 +123,18 @@ document.body.addEventListener("keyup", function (event) {
     }
 });
 function update(delta) {
-    //console.log(delta);
     if (player.direction > 0) {
         if (player.vx < 0) {
             player.vx *= 0.9;
         }
-        //player.sprite.scale.x = 1;
+        player.sprite.scale.x = 1;
         player.vx += 0.005;
     }
     else if (player.direction < 0) {
         if (player.vx > 0) {
             player.vx *= 0.9;
         }
-        //player.sprite.scale.x = -1;
+        player.sprite.scale.x = -1;
         player.vx -= 0.005;
     }
     else {
@@ -161,6 +143,14 @@ function update(delta) {
     //jumping
     if (player.jump && player.grounded) {
         player.vy -= 0.27;
+    }
+    for (var _i = 0, ladders_1 = ladders; _i < ladders_1.length; _i++) {
+        var l = ladders_1[_i];
+        if (intersect(player, l)) {
+            if (player.up) {
+                player.vy = -0.05;
+            }
+        }
     }
     player.jump = false;
     //gravity
@@ -210,7 +200,6 @@ function update(delta) {
     player.move(delta);
 }
 function draw(alpha) {
-    //console.log(alpha);
     player.interpolate(alpha);
     app.render();
 }
