@@ -126,7 +126,7 @@ class Player extends Entity {
   public jumps: number = 2;
   public jump: boolean = false;
   public direction: number = 0;
-  public speed: number = 0.5/8.333333333333;
+  public speed: number = 0.5 / 8.333333333333;
   public up: boolean = false;
   public walkCycle: SpriteAnimation;
   constructor() {
@@ -190,10 +190,10 @@ document.body.addEventListener("keyup", event => {
   }
 });
 function update(delta: number) {
-  if(player.direction != 0){
+  if (player.direction != 0) {
     player.walkCycle.start();
     player.setTexture(player.walkCycle.getFrame());
-  }else{
+  } else {
     player.walkCycle.stop();
     player.walkCycle.frameNumber = 0;
   }
@@ -260,3 +260,4 @@ MainLoop.setSimulationTimestep(1000 / 120)
   .setUpdate(update)
   .setDraw(draw)
   .start();
+
