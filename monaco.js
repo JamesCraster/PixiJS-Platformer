@@ -12,5 +12,7 @@ monaco.editor.create(document.getElementById("monacoContainer"), {
         "The stage is always 16 * 16 squares. \n" +
         'A square can be "Empty", "Stone" or "Ladder"\n' +
         "There is a 10,000 line limit on solutions. */",
-    language: "javascript"
+    language: "javascript",
+    theme: "vs-dark",
+    automaticLayout: true
 });
