@@ -8,7 +8,8 @@ app.stage.scale.y = 4;
 app.renderer.resize(128 * 4, 128 * 4);
 let spriteSheet = PIXI.Texture.fromImage("s4m_ur4i-8x8-pico-8-free-tiles.png")
     .baseTexture;
-let playerTexture = new PIXI.Texture(spriteSheet, new PIXI.Rectangle(8, 0, 8, 8));
+let playerSheet = PIXI.Texture.fromImage("player.png").baseTexture;
+let playerTextures = [new PIXI.Texture(playerSheet, new PIXI.Rectangle(0, 0, 8, 8)), new PIXI.Texture(playerSheet, new PIXI.Rectangle(0, 8, 8, 8))];
 let brickTexture = new PIXI.Texture(spriteSheet, new PIXI.Rectangle(0, 8, 8, 8));
 let ladderTexture = new PIXI.Texture(spriteSheet, new PIXI.Rectangle(8 * 6, 0, 8, 8));
 let batTexture = new PIXI.Texture(spriteSheet, new PIXI.Rectangle(8 * 8, 8 * 2, 16, 8));
@@ -97,13 +98,15 @@ for (let x = 0; x < cosmeticStage.length; x++) {
 }
 class Player extends Entity {
     constructor() {
-        super(20, 100, new PIXI.Sprite(playerTexture));
+        super(20, 100, new PIXI.Sprite(playerTextures[0]));
         this.grounded = false;
         this.jumps = 2;
         this.jump = false;
         this.direction = 0;
-        this.speed = 0.07;
+        this.speed = 0.5 / 8.333333333333;
         this.up = false;
+        this.walkCycle = new SpriteAnimation(playerTextures, true);
+        this.walkCycle.speed = 100;
         this.setAnchor(0.35, 0);
         this.width = 7;
         this.height = 7;
@@ -158,6 +161,14 @@ document.body.addEventListener("keyup", event => {
     }
 });
 function update(delta) {
+    if (player.direction != 0) {
+        player.walkCycle.start();
+        player.setTexture(player.walkCycle.getFrame());
+    }
+    else {
+        player.walkCycle.stop();
+        player.walkCycle.frameNumber = 0;
+    }
     if (player.direction > 0) {
         if (player.vx < 0) {
             player.vx *= 0.9;

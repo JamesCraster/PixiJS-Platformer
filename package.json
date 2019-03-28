@@ -1,21 +1,20 @@
 {
-  "name": "portalthonbasic",
-  "version": "1.0.0",
+  "name": "pixijsplatformer",
+  "version": "0.0.0",
   "description": "",
-  "main": "entity.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/JamesCraster/DemoPlatformer.git"
+    "url": "git+https://github.com/JamesCraster/PixiJS-Platformer.git"
   },
-  "author": "",
-  "license": "ISC",
+  "author": "James Craster",
+  "license": "Apache-2.0",
   "bugs": {
-    "url": "https://github.com/JamesCraster/DemoPlatformer/issues"
+    "url": "https://github.com/JamesCraster/PixiJS-Platformer/issues"
   },
-  "homepage": "https://github.com/JamesCraster/DemoPlatformer#readme",
+  "homepage": "https://github.com/JamesCraster/PixiJS-Platformer#readme",
   "dependencies": {
     "@types/mainloop.js": "^1.0.5",
     "@types/pixi.js": "^4.8.6"

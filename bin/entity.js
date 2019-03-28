@@ -1,17 +1,18 @@
 "use strict";
 class Entity {
-    constructor(x, y, sprite) {
-        this._x = x;
-        this._y = y;
+    //the constructor adds _x, _y and sprite properties to the object
+    constructor(_x, _y, sprite) {
+        this._x = _x;
+        this._y = _y;
+        this.sprite = sprite;
         this.vx = 0;
         this.vy = 0;
-        this._lastPos = { x: x, y: y };
-        this.sprite = sprite;
-        this.sprite.x = x;
-        this.sprite.y = y;
+        this.spriteOffset = { x: 0, y: 0 };
+        this._lastPos = { x: this._x, y: this._y };
+        this.sprite.x = this._x;
+        this.sprite.y = this._y;
         this.sprite.pivot.x = 0.5;
         this.sprite.pivot.y = 0.5;
-        this.spriteOffset = { x: 0, y: 0 };
         this.width = this.sprite.width;
         this.height = this.sprite.height;
         app.stage.addChild(sprite);
@@ -33,14 +34,20 @@ class Entity {
             this.spriteOffset.y = y * this.sprite.height;
         }
     }
+    setTexture(texture) {
+        let sprite = this.sprite;
+        if (sprite.texture) {
+            sprite.texture = texture;
+        }
+    }
     //only call for sudden movement, like teleportation, where the entity should jump to a new postion
     //without interpolation
     teleport(x, y) {
         this._x = x;
         this._y = y;
         this._lastPos = { x: x, y: y };
-        this.sprite.y = y;
         this.sprite.x = x;
+        this.sprite.y = y;
     }
     //call once and only once per physics update to move the entity
     move(delta) {
