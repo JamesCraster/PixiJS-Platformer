@@ -9,7 +9,10 @@ app.renderer.resize(128 * 4, 128 * 4);
 let spriteSheet = PIXI.Texture.fromImage("s4m_ur4i-8x8-pico-8-free-tiles.png")
     .baseTexture;
 let playerSheet = PIXI.Texture.fromImage("player.png").baseTexture;
-let playerTextures = [new PIXI.Texture(playerSheet, new PIXI.Rectangle(0, 0, 8, 8)), new PIXI.Texture(playerSheet, new PIXI.Rectangle(0, 8, 8, 8))];
+let playerTextures = [
+    new PIXI.Texture(playerSheet, new PIXI.Rectangle(0, 0, 8, 8)),
+    new PIXI.Texture(playerSheet, new PIXI.Rectangle(0, 8, 8, 8)),
+];
 let brickTexture = new PIXI.Texture(spriteSheet, new PIXI.Rectangle(0, 8, 8, 8));
 let ladderTexture = new PIXI.Texture(spriteSheet, new PIXI.Rectangle(8 * 6, 0, 8, 8));
 let batTexture = new PIXI.Texture(spriteSheet, new PIXI.Rectangle(8 * 8, 8 * 2, 16, 8));
@@ -72,6 +75,7 @@ class Ladder extends Entity {
 }
 const colliders = [];
 const ladders = [];
+const bats = [];
 for (let x = 0; x < stage.length; x++) {
     for (let y = 0; y < stage.length; y++) {
         switch (stage[y][x]) {
@@ -118,8 +122,13 @@ class Bat extends Entity {
     constructor(x, y) {
         super(x, y, new PIXI.Sprite(batTexture));
     }
+    update(targetX, targetY) {
+        this.vx = ((targetX - this.x > 0 ? 1 : -1) * 0.2) / 8.3333333333;
+        this.vy = ((targetY - this.y > 0 ? 1 : -1) * 0.2) / 8.3333333333;
+    }
 }
 const player = new Player();
+bats.push(new Bat(40, 40));
 document.body.addEventListener("keydown", event => {
     switch (event.keyCode) {
         case 38:
@@ -220,9 +229,16 @@ function update(delta) {
     let x = performance.now() / 10000;
     //cameraX = 5 * Math.sin(300 * x) * (1 - x / 5);
     player.move(delta);
+    for (let bat of bats) {
+        bat.update(player.x, player.y);
+        bat.move(delta);
+    }
 }
 function draw(alpha) {
     player.interpolate(alpha);
+    for (let bat of bats) {
+        bat.interpolate(alpha);
+    }
     app.stage.y = Math.floor(initStage + camera);
     app.stage.x = Math.floor(initStageX + cameraX);
     app.render();

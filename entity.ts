@@ -6,7 +6,11 @@ class Entity {
   public width: number;
   public height: number;
   //the constructor adds _x, _y and sprite properties to the object
-  constructor(private _x: number, private _y: number, public sprite: PIXI.DisplayObject & { width: number; height: number }) {
+  constructor(
+    private _x: number,
+    private _y: number,
+    public sprite: PIXI.DisplayObject & { width: number; height: number },
+  ) {
     this._lastPos = { x: this._x, y: this._y };
     this.sprite.x = this._x;
     this.sprite.y = this._y;
@@ -58,11 +62,11 @@ class Entity {
   interpolate(alpha: number) {
     this.sprite.x =
       Math.floor((this._lastPos.x + (this.x - this._lastPos.x) * alpha) * 4) /
-      4 +
+        4 +
       this.spriteOffset.x;
     this.sprite.y =
       Math.floor((this._lastPos.y + (this.y - this._lastPos.y) * alpha) * 4) /
-      4 +
+        4 +
       this.spriteOffset.y;
   }
 }
